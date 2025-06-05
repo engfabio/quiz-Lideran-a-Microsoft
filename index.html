@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz: Liderança Microsoft</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .quiz-container {
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #f9fafb;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .question-card {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+        
+        .hint-card {
+            background-color: #eef2ff;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            border-left: 4px solid #6366f1;
+        }
+        
+        .option-button {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 10px;
+            text-align: left;
+            background-color: #f3f4f6;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+        
+        .option-button:hover {
+            background-color: #e5e7eb;
+            border-color: #9ca3af;
+        }
+        
+        .option-button.selected {
+            background-color: #6366f1;
+            color: white;
+            border-color: #4f46e5;
+        }
+        
+        .feedback-message {
+            padding: 10px;
+            border-radius: 6px;
+            margin-top: 15px;
+            font-weight: 500;
+        }
+        
+        .feedback-message.correct {
+            background-color: #d1fae5;
+            color: #065f46;
+        }
+        
+        .feedback-message.incorrect {
+            background-color: #fee2e2;
+            color: #991b1b;
+        }
+        
+        .progress-bar-container {
+            width: 100%;
+            background-color: #e5e7eb;
+            border-radius: 9999px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+        
+        .progress-bar {
+            height: 10px;
+            background-color: #6366f1;
+            width: 0%;
+            border-radius: 9999px;
+            transition: width 0.3s ease-in-out;
+        }
+        
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Nunito:wght@400;600;700&display=swap');
+        
+        body {
+            font-family: 'Nunito', sans-serif;
+        }
+        
+        h1, h2, h3 {
+            font-family: 'Inter', sans-serif;
+            font-weight: 700;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
+
+    <div class="quiz-container w-full">
+        <h1 class="text-2xl sm:text-3xl font-bold text-center mb-6 text-indigo-700">🧠 Quiz: Liderança Microsoft 🧠</h1>
+
+        <div id="quiz-area">
+            <div class="progress-bar-container">
+                <div id="progress-bar" class="progress-bar"></div>
+            </div>
+            <div id="question-number" class="text-sm text-gray-500 mb-2 text-right"></div>
+
+            <div class="question-card">
+                <h2 id="question-text" class="text-lg sm:text-xl font-semibold mb-3 text-gray-800"></h2>
+                <div id="hint-area" class="hint-card">
+                    <p class="text-sm font-medium text-indigo-700">🤔 Pista Visual:</p>
+                    <p id="hint-keyword" class="text-sm text-gray-700 mt-1"></p>
+                    <p id="hint-visualization" class="text-sm text-gray-700 mt-1"></p>
+                </div>
+            </div>
+
+            <div id="options-area" class="mt-4">
+                <!-- As opções serão inseridas aqui pelo JavaScript -->
+            </div>
+
+            <button id="next-button" class="w-full mt-6 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-4 rounded-lg shadow-md transition duration-150 ease-in-out">
+                Próxima Pergunta
+            </button>
+            <div id="feedback-area" class="mt-4"></div>
+        </div>
+
+        <div id="results-area" class="hidden text-center question-card">
+            <h2 class="text-2xl font-bold mb-4 text-indigo-700">Resultados do Quiz!</h2>
+            <p id="score-text" class="text-xl mb-3 text-gray-800"></p>
+            <p id="final-message" class="text-lg font-medium mb-6"></p>
+            <img id="result-gif" src="" alt="Resultado GIF" class="mx-auto rounded-lg mb-6" style="max-width: 250px; display: none;">
+            <button id="restart-button" class="w-full sm:w-auto bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-6 rounded-lg shadow-md transition duration-150 ease-in-out">
+                Tentar Novamente
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const quizData = [
+            {
+                id: 1,
+                conceitoChave: "Qual conceito de liderança se refere à ideia de que o CEO Satya Nadella viu que era preciso uma nova CULTURA para a Microsoft voltar a crescer, promovendo uma 'mentalidade de crescimento' onde todos acreditam que podem aprender e evoluir?",
+                pista: {
+                    palavraChave: "Palavra-chave: CULTURA-CRESCIMENTO",
+                    visualizacao: "Visualização: Imagine Nadella plantando uma 'árvore de crescimento' 🌱🌳 no centro da Microsoft, onde antes havia um 'bloco de pedra fixo' 🧱. Esta árvore precisa de uma nova cultura para florescer."
+                },
+                opcoes: [
+                    "Liderança pelo Exemplo e Autotransformação",
+                    "Visão e Necessidade de Mudança Cultural",
+                    "Da Inspeção ao Coaching",
+                    "Empatia e Escuta Ativa"
+                ],
+                respostaCorreta: "Visão e Necessidade de Mudança Cultural",
+                aprendizado: "Aprendizado 1: Visão e Necessidade de Mudança Cultural"
+            },
+            {
+                id: 2,
+                conceitoChave: "Qual aprendizado destaca que os líderes, como Courtois, não apenas falaram sobre mudança, mas *demonstraram* os novos comportamentos, reconhecendo a necessidade de transformar seu próprio estilo para se alinhar à nova cultura de coaching?",
+                pista: {
+                    palavraChave: "Palavra-chave: ESPELHO-AÇÃO",
+                    visualizacao: "Visualização: Imagine Courtois se olhando no espelho 🪞 e, em vez de seu reflexo antigo, ele começa a AGIR como um coach 👨‍🏫, mudando sua postura e ações."
+                },
+                opcoes: [
+                    "Liderança pelo Exemplo e Autotransformação",
+                    "Vulnerabilidade e Segurança Psicológica",
+                    "Da Inspeção ao Coaching",
+                    "Foco no Cliente e Métricas Relevantes"
+                ],
+                respostaCorreta: "Liderança pelo Exemplo e Autotransformação",
+                aprendizado: "Aprendizado 2: Liderança pelo Exemplo e Autotransformação"
+            },
+            {
+                id: 3,
+                conceitoChave: "Que princípio de liderança envolveu a substituição ativa da antiga cultura de 'comando e controle' por uma de aprendizado e coaching, onde os gerentes ajudam suas equipes a se desenvolverem com perguntas reflexivas?",
+                pista: {
+                    palavraChave: "Palavra-chave: LUPA-TREINADOR",
+                    visualizacao: "Visualização: Um gerente troca uma lupa 🔎 (inspeção) por um apito e uma prancheta de TREINADOR 📋 (desenvolvimento)."
+                },
+                opcoes: [
+                    "Empatia e Escuta Ativa",
+                    "Visão e Necessidade de Mudança Cultural",
+                    "Da Inspeção ao Coaching",
+                    "Capacitação e Empoderamento (Empowering Success)"
+                ],
+                respostaCorreta: "Da Inspeção ao Coaching",
+                aprendizado: "Aprendizado 3: Da Inspeção ao Coaching"
+            },
+            {
+                id: 4,
+                conceitoChave: "Qual valor de liderança, praticado por Nadella e Courtois, enfatiza a importância de ouvir atentamente e de se colocar no lugar dos outros, criando um ambiente onde as pessoas se sintam à vontade para se expressar?",
+                pista: {
+                    palavraChave: "Palavra-chave: OUVIDOS-CORAÇÃO",
+                    visualizacao: "Visualização: Um líder com orelhas bem grandes 👂 e um coração visível no peito ❤️, simbolizando escuta e conexão."
+                },
+                opcoes: [
+                    "Empatia e Escuta Ativa",
+                    "Desafiar e Mudar Rituais Arraigados",
+                    "Uso de Dados e Ferramentas para Suporte (Não Punição)",
+                    "Persistência e Reconhecimento da Jornada"
+                ],
+                respostaCorreta: "Empatia e Escuta Ativa",
+                aprendizado: "Aprendizado 4: Empatia e Escuta Ativa"
+            },
+            {
+                id: 5,
+                conceitoChave: "Que aspecto da cultura de transformação incentivou um ambiente onde líderes e equipes pudessem admitir não ter todas as respostas ou que cometeram erros, como quando um vice-presidente recompensava erros compartilhados?",
+                pista: {
+                    palavraChave: "Palavra-chave: ABRIR-CONFIAR",
+                    visualizacao: "Visualização: Executivos em uma reunião de 'peito aberto' 🤝, sem 'armaduras', construindo uma ponte de CONFIANÇA."
+                },
+                opcoes: [
+                    "Liderança pelo Exemplo e Autotransformação",
+                    "Vulnerabilidade e Segurança Psicológica",
+                    "O Papel Crítico dos Gerentes Intermediários",
+                    "Foco no Cliente e Métricas Relevantes"
+                ],
+                respostaCorreta: "Vulnerabilidade e Segurança Psicológica",
+                aprendizado: "Aprendizado 5: Vulnerabilidade e Segurança Psicológica"
+            },
+            {
+                id: 6,
+                conceitoChave: "Qual aprendizado se refere a como a Microsoft não apenas esperava que os funcionários mudassem, mas os capacitou ativamente com treinamento técnico e ferramentas (como dashboards) para tomar melhores decisões?",
+                pista: {
+                    palavraChave: "Palavra-chave: FERRAMENTAS-PODER",
+                    visualizacao: "Visualização: Um funcionário recebe uma 'caixa de FERRAMENTAS mágicas' 🛠️✨ que lhe dá mais força e capacidade (PODER)."
+                },
+                opcoes: [
+                    "Da Inspeção ao Coaching",
+                    "Visão e Necessidade de Mudança Cultural",
+                    "Capacitação e Empoderamento (Empowering Success)",
+                    "Persistência e Reconhecimento da Jornada"
+                ],
+                respostaCorreta: "Capacitação e Empoderamento (Empowering Success)",
+                aprendizado: "Aprendizado 6: Capacitação e Empoderamento (Empowering Success)"
+            },
+            {
+                id: 7,
+                conceitoChave: "Que mudança estratégica colocou o sucesso do cliente no centro, refletindo-se em métricas onde a remuneração passou a depender do *uso real* dos serviços na nuvem pelos clientes?",
+                pista: {
+                    palavraChave: "Palavra-chave: CLIENTE-BÚSSOLA",
+                    visualizacao: "Visualização: Uma equipe com uma BÚSSOLA 🧭 que aponta para o 'CLIENTE satisfeito e usando os serviços'."
+                },
+                opcoes: [
+                    "Foco no Cliente e Métricas Relevantes",
+                    "Empatia e Escuta Ativa",
+                    "Desafiar e Mudar Rituais Arraigados",
+                    "Uso de Dados e Ferramentas para Suporte (Não Punição)"
+                ],
+                respostaCorreta: "Foco no Cliente e Métricas Relevantes",
+                aprendizado: "Aprendizado 7: Foco no Cliente e Métricas Relevantes"
+            },
+            {
+                id: 8,
+                conceitoChave: "Qual princípio de liderança envolveu a coragem de desafiar e eliminar rituais antigos que não serviam à nova cultura, como a extinção da 'avaliação de meio de ano'?",
+                pista: {
+                    palavraChave: "Palavra-chave: QUEBRAR-ESTÁTUA",
+                    visualizacao: "Visualização: Líderes QUEBRANDO uma grande ESTÁTUA 🏛️💔 chamada 'Velhos Rituais' para abrir espaço para o novo."
+                },
+                opcoes: [
+                    "Vulnerabilidade e Segurança Psicológica",
+                    "Desafiar e Mudar Rituais Arraigados",
+                    "O Papel Crítico dos Gerentes Intermediários",
+                    "Liderança pelo Exemplo e Autotransformação"
+                ],
+                respostaCorreta: "Desafiar e Mudar Rituais Arraigados",
+                aprendizado: "Aprendizado 8: Desafiar e Mudar Rituais Arraigados"
+            },
+            {
+                id: 9,
+                conceitoChave: "Este aprendizado destaca como novas ferramentas digitais e dashboards foram introduzidos para fornecer insights para aprendizado e coaching, com a mensagem clara de que os dados seriam para suporte, não para punição.",
+                pista: {
+                    palavraChave: "Palavra-chave: DADOS-LANTERNA",
+                    visualizacao: "Visualização: Um funcionário recebe uma LANTERNA de DADOS 💡📊 para iluminar seu caminho e mostrar onde pisar melhor."
+                },
+                opcoes: [
+                    "Capacitação e Empoderamento (Empowering Success)",
+                    "Visão e Necessidade de Mudança Cultural",
+                    "Uso de Dados e Ferramentas para Suporte (Não Punição)",
+                    "Foco no Cliente e Métricas Relevantes"
+                ],
+                respostaCorreta: "Uso de Dados e Ferramentas para Suporte (Não Punição)",
+                aprendizado: "Aprendizado 9: Uso de Dados e Ferramentas para Suporte (Não Punição)"
+            },
+            {
+                id: 10,
+                conceitoChave: "Qual conceito ressalta que a transformação cultural é uma jornada contínua, não um projeto com data para terminar, com líderes como Courtois reconhecendo que a internalização de novos hábitos ainda tinha um longo caminho?",
+                pista: {
+                    palavraChave: "Palavra-chave: MARATONA-EVOLUÇÃO",
+                    visualizacao: "Visualização: A transformação cultural como uma longa MARATONA 🏃‍♂️🔁, onde cada etapa é uma EVOLUÇÃO constante."
+                },
+                opcoes: [
+                    "Persistência e Reconhecimento da Jornada",
+                    "Da Inspeção ao Coaching",
+                    "Empatia e Escuta Ativa",
+                    "Liderança pelo Exemplo e Autotransformação"
+                ],
+                respostaCorreta: "Persistência e Reconhecimento da Jornada",
+                aprendizado: "Aprendizado 10: Persistência e Reconhecimento da Jornada"
+            },
+            {
+                id: 11,
+                conceitoChave: "Este aprendizado foca na importância dos gerentes de linha de frente como o 'efeito multiplicador' para disseminar a nova cultura, com sua função evoluindo para selecionar, aprimorar e motivar talentos.",
+                pista: {
+                    palavraChave: "Palavra-chave: GERENTE-PONTE",
+                    visualizacao: "Visualização: Gerentes intermediários como PONTES 🌉 robustas, conectando a visão da liderança à execução pelas equipes."
+                },
+                opcoes: [
+                    "Vulnerabilidade e Segurança Psicológica",
+                    "O Papel Crítico dos Gerentes Intermediários",
+                    "Capacitação e Empoderamento (Empowering Success)",
+                    "Visão e Necessidade de Mudança Cultural"
+                ],
+                respostaCorreta: "O Papel Crítico dos Gerentes Intermediários",
+                aprendizado: "Aprendizado 11: O Papel Crítico dos Gerentes Intermediários"
+            }
+        ];
+
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let selectedOption = null;
+
+        const questionTextElement = document.getElementById('question-text');
+        const hintKeywordElement = document.getElementById('hint-keyword');
+        const hintVisualizationElement = document.getElementById('hint-visualization');
+        const optionsAreaElement = document.getElementById('options-area');
+        const nextButtonElement = document.getElementById('next-button');
+        const feedbackAreaElement = document.getElementById('feedback-area');
+        const quizAreaElement = document.getElementById('quiz-area');
+        const resultsAreaElement = document.getElementById('results-area');
+        const scoreTextElement = document.getElementById('score-text');
+        const finalMessageElement = document.getElementById('final-message');
+        const restartButtonElement = document.getElementById('restart-button');
+        const progressBarElement = document.getElementById('progress-bar');
+        const questionNumberElement = document.getElementById('question-number');
+        const resultGifElement = document.getElementById('result-gif');
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        function loadQuestion() {
+            selectedOption = null;
+            feedbackAreaElement.innerHTML = '';
+            nextButtonElement.textContent = 'Responder';
+            nextButtonElement.disabled = true;
+
+            if (currentQuestionIndex < quizData.length) {
+                const currentQuestion = quizData[currentQuestionIndex];
+                questionTextElement.textContent = currentQuestion.conceitoChave;
+                hintKeywordElement.textContent = currentQuestion.pista.palavraChave;
+                hintVisualizationElement.innerHTML = currentQuestion.pista.visualizacao;
+
+                optionsAreaElement.innerHTML = '';
+                const shuffledOptions = [...currentQuestion.opcoes];
+                shuffleArray(shuffledOptions);
+
+                shuffledOptions.forEach(optionText => {
+                    const button = document.createElement('button');
+                    button.textContent = optionText;
+                    button.classList.add('option-button');
+                    button.addEventListener('click', () => selectOption(button, optionText));
+                    optionsAreaElement.appendChild(button);
+                });
+
+                const progressPercentage = ((currentQuestionIndex + 1) / quizData.length) * 100;
+                progressBarElement.style.width = `${progressPercentage}%`;
+                questionNumberElement.textContent = `Pergunta ${currentQuestionIndex + 1} de ${quizData.length}`;
+            } else {
+                showResults();
+            }
+        }
+
+        function selectOption(button, optionText) {
+            const allOptionButtons = optionsAreaElement.querySelectorAll('.option-button');
+            allOptionButtons.forEach(btn => btn.classList.remove('selected'));
+
+            button.classList.add('selected');
+            selectedOption = optionText;
+            nextButtonElement.disabled = false;
+        }
+
+        nextButtonElement.addEventListener('click', () => {
+            if (nextButtonElement.textContent === 'Responder') {
+                checkAnswer();
+            } else {
+                currentQuestionIndex++;
+                loadQuestion();
+            }
+        });
+
+        function checkAnswer() {
+            const currentQuestion = quizData[currentQuestionIndex];
+            let feedbackMessage = '';
+
+            if (selectedOption === currentQuestion.respostaCorreta) {
+                score++;
+                feedbackMessage = `<div class="feedback-message correct">🎉 Correto! Você é demais!</div>`;
+            } else {
+                feedbackMessage = `<div class="feedback-message incorrect">🤔 Ops! A resposta correta era: "${currentQuestion.respostaCorreta}". Mas não desanime!</div>`;
+            }
+            feedbackAreaElement.innerHTML = feedbackMessage;
+            nextButtonElement.textContent = 'Próxima Pergunta';
+            if (currentQuestionIndex === quizData.length - 1) {
+                nextButtonElement.textContent = 'Ver Resultados';
+            }
+
+            const allOptionButtons = optionsAreaElement.querySelectorAll('.option-button');
+            allOptionButtons.forEach(btn => btn.disabled = true);
+        }
+
+        function showResults() {
+            quizAreaElement.classList.add('hidden');
+            resultsAreaElement.classList.remove('hidden');
+            scoreTextElement.textContent = `Sua pontuação: ${score} de ${quizData.length}`;
+
+            let message = '';
+            let gifSrc = '';
+
+            if (score >= 7) {
+                message = `Parabéns! 🥳 Com ${score} acertos, você com certeza vai deixar a Diretora Adriana muito feliz! Excelente conhecimento sobre liderança!`;
+                gifSrc = 'https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNWY5cW05aW16ZzYxZm1xdjRmdmN6d2N0c3NnNThpbHBjZ2ZtaHZpMyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/3oz9JRhgVepD0c6Qp2/giphy.gif';
+            } else if (score >= 4) {
+                message = `Muito bom! 👍 Você acertou ${score}! Continue estudando e da próxima vez você chega lá para impressionar a Diretora Adriana!`;
+                gifSrc = 'https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExbWJ0eXg2dzZqYjU5a3VpcGZ2b3FkZ2Z0NmJ0N3l2c3J0NG9qYnZpZSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/l41JMs1R4j3zuL9yE/giphy.gif';
+            } else {
+                message = `Continue tentando! 🧠 Você acertou ${score}. A jornada do aprendizado é assim mesmo. Revise o material e tente novamente!`;
+                gifSrc = 'https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExbXJqZHJ0dGJqNnZ2M2N3d216N2N1c3A1d2R0dDA4bXJzYWN2eHl2dCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/gHpusV0xPA2X6/giphy.gif';
+            }
+            finalMessageElement.textContent = message;
+
+            if (gifSrc) {
+                resultGifElement.src = gifSrc;
+                resultGifElement.style.display = 'block';
+            } else {
+                resultGifElement.style.display = 'none';
+            }
+        }
+
+        restartButtonElement.addEventListener('click', () => {
+            currentQuestionIndex = 0;
+            score = 0;
+            resultsAreaElement.classList.add('hidden');
+            quizAreaElement.classList.remove('hidden');
+            resultGifElement.style.display = 'none';
+            loadQuestion();
+        });
+
+        // Iniciar o quiz
+        loadQuestion();
+    </script>
+</body>
+</html>
